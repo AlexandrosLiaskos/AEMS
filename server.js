@@ -808,29 +808,9 @@ app.post('/api/emails/:id/restore', [
     }
 });
 
-// Permanently delete email
-app.delete('/api/emails/:id/permanent', [
-    strictLimiter, // Apply strict rate limiting to permanent delete
-    requireAuth,
-    validateEmailId
-], async (req, res) => {
-    try {
-        const { id } = req.params;
 
-        // Get the email first to ensure it's in deleted status
-        const email = await db.getEmailById(id);
-        if (!email || email.status !== 'DELETED') {
-            return res.status(404).json({ error: 'Email not found in recycle bin' });
-        }
 
-        // For now, we'll just keep it as deleted (true permanent delete would remove from file)
-        // This is a placeholder for actual permanent deletion if needed
-        res.json({ success: true, message: 'Email permanently deleted' });
-    } catch (error) {
-        console.error('Failed to permanently delete email:', error);
-        res.status(500).json({ error: 'Failed to permanently delete email' });
-    }
-});
+
 
 // ==========================================
 // EXPORT ROUTES

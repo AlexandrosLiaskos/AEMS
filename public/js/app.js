@@ -926,9 +926,6 @@ class AEMS {
             <button class="btn btn-sm btn-primary" data-action="restoreEmail" data-email-id="${emailId}">
               Restore
             </button>
-            <button class="btn btn-sm btn-destructive" data-action="permanentDeleteEmail" data-email-id="${emailId}">
-              Delete Permanently
-            </button>
           </div>
         `;
             default:
@@ -948,10 +945,7 @@ class AEMS {
             managed: [
                 { label: 'Export All', action: 'exportManagedEmails', class: 'btn-outline', icon: 'fas fa-download' }
             ],
-            deleted: [
-                { label: 'Restore Selected', action: 'bulkRestoreEmails', class: 'btn-primary' },
-                { label: 'Delete Permanently', action: 'bulkPermanentDeleteEmails', class: 'btn-destructive' }
-            ]
+            deleted: []
         };
 
         if (!actions[stage]) return '';
@@ -1953,7 +1947,7 @@ class AEMS {
 
             const response = await this.apiRequest('/api/emails/sync-old', {
                 method: 'POST',
-                body: JSON.stringify({ fromDate, toDate, maxResults })
+                body: { fromDate, toDate, maxResults }
             });
 
             if (response.ok) {
@@ -2535,42 +2529,7 @@ class AEMS {
         }
     }
 
-    async permanentDeleteEmail(emailId) {
-        if (!emailId) {
-            console.error('No email ID provided for permanent deletion');
-            return;
-        }
 
-        // Confirm permanent deletion with custom dialog
-        const confirmed = await this.showConfirmDialog(
-            'Are you sure you want to permanently delete this email? This action cannot be undone.',
-            'Permanent Delete',
-            'Delete Forever',
-            'btn-destructive'
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        try {
-            const response = await this.apiRequest(`/api/emails/${emailId}/permanent`, {
-                method: 'DELETE'
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                this.addNotification('Email Permanently Deleted', 'Email permanently deleted', 'success');
-                await this.refreshCurrentView();
-            } else {
-                throw new Error(result.error || 'Failed to permanently delete email');
-            }
-        } catch (error) {
-            console.error('Permanent delete email error:', error);
-            this.addNotification('Permanent Delete Failed', error.message || 'Could not permanently delete email', 'error');
-        }
-    }
 
     addNotification(title, message, type = 'info') {
         const notification = {
@@ -2751,117 +2710,9 @@ class AEMS {
         }
     }
 
-    async bulkRestoreEmails() {
-        const selectedIds = this.getSelectedEmailIds();
-        if (selectedIds.length === 0) {
-            this.addNotification('No Selection', 'Please select emails to restore', 'warning');
-            return;
-        }
 
-        // Confirm bulk restore with custom dialog
-        const confirmed = await this.showConfirmDialog(
-            `Are you sure you want to restore ${selectedIds.length} email${selectedIds.length > 1 ? 's' : ''}?`,
-            'Bulk Restore',
-            'Restore All',
-            'btn-primary'
-        );
 
-        if (!confirmed) {
-            return;
-        }
 
-        try {
-            // Process each email individually since there might not be a bulk restore API
-            let successCount = 0;
-            let errorCount = 0;
-
-            for (const emailId of selectedIds) {
-                try {
-                    const response = await this.apiRequest(`/api/emails/${emailId}/restore`, {
-                        method: 'POST'
-                    });
-
-                    if (response.ok) {
-                        successCount++;
-                    } else {
-                        errorCount++;
-                    }
-                } catch (error) {
-                    errorCount++;
-                }
-            }
-
-            if (successCount > 0) {
-                this.addNotification(
-                    'Bulk Restore Complete',
-                    `${successCount} email${successCount > 1 ? 's' : ''} restored successfully${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
-                    errorCount > 0 ? 'warning' : 'success'
-                );
-                await this.refreshCurrentView();
-            } else {
-                this.addNotification('Bulk Restore Failed', 'Failed to restore any emails', 'error');
-            }
-        } catch (error) {
-            console.error('Bulk restore error:', error);
-            this.addNotification('Bulk Restore Failed', 'An error occurred during bulk restore', 'error');
-        }
-    }
-
-    async bulkPermanentDeleteEmails() {
-        const selectedIds = this.getSelectedEmailIds();
-        if (selectedIds.length === 0) {
-            this.addNotification('No Selection', 'Please select emails to delete permanently', 'warning');
-            return;
-        }
-
-        // Confirm bulk permanent delete with custom dialog
-        const confirmed = await this.showConfirmDialog(
-            `Are you sure you want to permanently delete ${selectedIds.length} email${selectedIds.length > 1 ? 's' : ''}? This action cannot be undone.`,
-            'Permanent Delete',
-            'Delete Forever',
-            'btn-destructive'
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        try {
-            // Process each email individually
-            let successCount = 0;
-            let errorCount = 0;
-
-            for (const emailId of selectedIds) {
-                try {
-                    const response = await this.apiRequest(`/api/emails/${emailId}/permanent`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        successCount++;
-                    } else {
-                        errorCount++;
-                    }
-                } catch (error) {
-                    errorCount++;
-                }
-            }
-
-            if (successCount > 0) {
-                this.addNotification(
-                    'Bulk Delete Complete',
-                    `${successCount} email${successCount > 1 ? 's' : ''} permanently deleted${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
-                    errorCount > 0 ? 'warning' : 'success'
-                );
-                await this.refreshCurrentView();
-            } else {
-                this.addNotification('Bulk Delete Failed', 'Failed to delete any emails', 'error');
-            }
-        } catch (error) {
-            console.error('Bulk permanent delete error:', error);
-            this.addNotification('Bulk Delete Failed', 'An error occurred during bulk delete', 'error');
-        }
-    }
 }
 
 // Simple component classes
