@@ -6,7 +6,15 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "echo 'No build process needed for this simple setup'"
+    "build": "echo 'No build process needed for this simple setup'",
+    "test": "node tests/run-tests.js",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:unit": "jest tests/unit --verbose",
+    "test:integration": "jest tests/integration --verbose",
+    "test:quick": "jest --passWithNoTests",
+    "test:debug": "jest --verbose --no-cache --runInBand",
+    "test:ci": "jest --ci --coverage --watchAll=false"
   },
   "dependencies": {
     "@langchain/community": "^0.3.51",
@@ -34,7 +42,10 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "@jest/globals": "^30.0.5",
+    "jest": "^30.0.5",
+    "nodemon": "^3.0.2",
+    "supertest": "^7.1.4"
   },
   "keywords": [
     "email",
@@ -44,5 +55,21 @@
     "automation"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "lib/**/*.js",
+      "server.js",
+      "!lib/**/*.test.js",
+      "!node_modules/**"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup/test-setup.js"
+    ],
+    "testTimeout": 30000
+  }
 }

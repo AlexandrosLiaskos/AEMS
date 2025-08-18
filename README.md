@@ -47,6 +47,9 @@ A management system that leverages AI to automatically categorize, extract, and 
 - ✅ **Automated Backup System**: Scheduled backups with retention policies and integrity verification
 - ✅ **AI Cost Control**: Usage tracking, daily limits, and intelligent batch processing
 - ✅ **Memory Management**: Automatic cleanup, leak prevention, and resource optimization
+- ✅ **Table Search**: Full-text search across all email fields
+- ✅ **Multi-Column Sorting**: Click-to-sort functionality on all table headers with visual sort indicators
+- ✅ **Smart Filtering**: Category, date range, and sender filters with real-time statistics and one-click clear
 
 ## 💻 System Requirements
 
