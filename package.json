@@ -1,30 +1,17 @@
 {
-  "name": "AEMS",
+  "name": "aems",
   "version": "1.0.0",
-  "description": "Agentic Email Management System - Simple Node.js + JSON DB approach",
-  "main": "electron-main.js",
+  "description": "Agentic Email Management System",
+  "main": "main.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "build": "echo 'No build process needed for this simple setup'",
-    "test": "node tests/run-tests.js",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:unit": "jest tests/unit --verbose",
-    "test:integration": "jest tests/integration --verbose",
-    "test:quick": "jest --passWithNoTests",
-    "test:debug": "jest --verbose --no-cache --runInBand",
-    "test:ci": "jest --ci --coverage --watchAll=false",
+    "dev": "node server.js",
     "electron": "electron .",
-    "electron:dev": "NODE_ENV=development electron .",
-    "electron:pack": "electron-builder --dir",
-    "electron:dist": "electron-builder",
-    "electron:dist:win": "electron-builder --win",
-    "electron:dist:mac": "electron-builder --mac",
-    "electron:dist:linux": "electron-builder --linux",
-    "build:windows": "node build-scripts/build-windows.js",
-    "build:all": "node build-scripts/build-all.js",
-    "build:release": "npm run build:all && echo 'Release build completed!'"
+    "electron-dev": "AEMS_MODE=desktop electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux"
   },
   "dependencies": {
     "@langchain/community": "^0.3.51",
@@ -39,7 +26,6 @@
     "express-validator": "^7.0.1",
     "googleapis": "^128.0.0",
     "helmet": "^7.1.0",
-    "jsdom": "^23.0.1",
     "langchain": "^0.1.30",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
@@ -49,29 +35,13 @@
     "pdf-parse": "^1.1.1",
     "uuid": "^9.0.1",
     "write-file-atomic": "^6.0.0",
-    "xlsx": "^0.18.5",
-    "electron-updater": "^6.6.2"
+    "xlsx": "^0.18.5"
   },
+  "homepage": "./",
   "devDependencies": {
-    "@jest/globals": "^30.0.5",
-    "electron": "^37.3.0",
-    "electron-builder": "^26.0.12",
-    "jest": "^30.0.5",
-    "nodemon": "^3.0.2",
-    "supertest": "^7.1.4"
+    "electron": "^37.3.1",
+    "electron-builder": "^26.0.12"
   },
-  "keywords": [
-    "email",
-    "management",
-    "gmail",
-    "ai",
-    "automation"
-  ],
-  "author": {
-    "name": "Alexandros Liaskos",
-    "email": "alexliaskosga@gmail.com"
-  },
-  "license": "MIT",
   "build": {
     "appId": "com.aems.desktop",
     "productName": "AEMS - Agentic Email Management System",
@@ -79,91 +49,28 @@
       "output": "dist"
     },
     "files": [
-      "electron-main.js",
-      "electron-preload.js",
+      "main.js",
+      "preload.js",
       "server.js",
       "lib/**/*",
       "public/**/*",
       "node_modules/**/*",
-      "!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
-      "!node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
-      "!node_modules/*.d.ts",
-      "!node_modules/.bin",
-      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
-      "!.editorconfig",
-      "!**/._*",
-      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
-      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
-      "!**/{appveyor.yml,.travis.yml,circle.yml}",
-      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}",
-      "!tests/**/*",
-      "!coverage/**/*",
-      "!dummy_data/**/*",
-      "!*.md",
-      "!.env*"
-    ],
-    "asarUnpack": [
-      "node_modules/electron-updater/**/*"
-    ],
-    "extraResources": [
-      {
-        "from": "assets",
-        "to": "assets",
-        "filter": ["**/*"]
-      }
+      "package.json",
+      "!node_modules/.cache",
+      "!**/*.map"
     ],
     "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        }
-      ],
-      "verifyUpdateCodeSignature": false
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
     },
     "nsis": {
       "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "deleteAppDataOnUninstall": false,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "AEMS",
-      "installerIcon": "assets/icon.ico",
-      "uninstallerIcon": "assets/icon.ico",
-      "installerHeaderIcon": "assets/icon.ico"
-    },
-    "mac": {
-      "target": "dmg",
-      "icon": "assets/icon.icns",
-      "category": "public.app-category.productivity"
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "assets/icon.png",
-      "category": "Office"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "AlexandrosLiaskos",
-      "repo": "aems-02"
+      "allowToChangeInstallationDirectory": true
     }
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "collectCoverageFrom": [
-      "lib/**/*.js",
-      "server.js",
-      "!lib/**/*.test.js",
-      "!node_modules/**"
-    ],
-    "testMatch": [
-      "**/tests/**/*.test.js"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/tests/setup/test-setup.js"
-    ],
-    "testTimeout": 30000
-  },
-  "homepage": "./"
+  }
 }

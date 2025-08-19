@@ -1328,18 +1328,44 @@ cron.schedule('*/5 * * * *', async () => {
 // START SERVER
 // ==========================================
 
-const server = app.listen(PORT, () => {
-    console.log(`🚀 AEMS Server running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-    console.log(`🔒 Security features enabled`);
+let server;
 
-    // Initialize database
-    db.init();
+const startServer = () => {
+    return new Promise((resolve, reject) => {
+        server = app.listen(PORT, (err) => {
+            if (err) {
+                reject(err);
+                return;
+            }
 
-    // Log environment info (sanitized)
-    const envInfo = envValidator.getSanitizedEnvInfo();
-    console.log('📋 Configuration:', envInfo);
-});
+            console.log(`🚀 AEMS Server running on port ${PORT}`);
+            console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+            console.log(`🔒 Security features enabled`);
+
+            // Initialize database
+            db.init();
+
+            // Log environment info (sanitized)
+            const envInfo = envValidator.getSanitizedEnvInfo();
+            console.log('📋 Configuration:', envInfo);
+
+            resolve(server);
+        });
+    });
+};
+
+// Auto-start server if not in Electron mode
+if (process.env.AEMS_MODE !== 'desktop') {
+    startServer().catch(error => {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    });
+} else {
+    // In Electron mode, start server immediately but don't exit on error
+    startServer().catch(error => {
+        console.error('Failed to start server in Electron mode:', error);
+    });
+}
 
 // Graceful shutdown handling
 const gracefulShutdown = (signal) => {
@@ -1379,28 +1405,36 @@ const gracefulShutdown = (signal) => {
     }, 30000);
 };
 
-// Handle shutdown signals
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+// Handle shutdown signals - only in CLI mode
+if (process.env.AEMS_MODE !== 'desktop') {
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-    console.error('💥 Uncaught Exception:', error);
-    auditLogger.logError('UNCAUGHT_EXCEPTION', {
-        error: error.message,
-        stack: error.stack
+    // Handle uncaught exceptions
+    process.on('uncaughtException', (error) => {
+        console.error('💥 Uncaught Exception:', error);
+        auditLogger.logError('UNCAUGHT_EXCEPTION', {
+            error: error.message,
+            stack: error.stack
+        });
+        gracefulShutdown('UNCAUGHT_EXCEPTION');
     });
-    gracefulShutdown('UNCAUGHT_EXCEPTION');
-});
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
-    auditLogger.logError('UNHANDLED_REJECTION', {
-        reason: reason?.message || reason,
-        stack: reason?.stack
+    // Handle unhandled promise rejections
+    process.on('unhandledRejection', (reason, promise) => {
+        console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
+        auditLogger.logError('UNHANDLED_REJECTION', {
+            reason: reason?.message || reason,
+            stack: reason?.stack
+        });
+        gracefulShutdown('UNHANDLED_REJECTION');
     });
-    gracefulShutdown('UNHANDLED_REJECTION');
-});
+}
 
-module.exports = app;
+// Export both app and server for different use cases
+module.exports = {
+    app,
+    server,
+    startServer,
+    gracefulShutdown
+};
