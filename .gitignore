@@ -51,6 +51,8 @@ Thumbs.db
 
 # Large files
 *AEMS.exe
+AEMS-Settings-Updated.exe
+*.exe
 
 # Temporary files
 *.tmp
