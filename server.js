@@ -1,4 +1,10 @@
-require('dotenv').config();
+const path = require('path');
+
+// In desktop mode, settings are managed by the settings manager
+// In CLI mode, use dotenv for backward compatibility
+if (process.env.AEMS_MODE !== 'desktop') {
+    require('dotenv').config();
+}
 
 // Validate environment variables before starting
 const envValidator = require('./lib/env-validator');
@@ -7,7 +13,6 @@ envValidator.validateOrExit();
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
-const path = require('path');
 const cron = require('node-cron');
 const XLSX = require('xlsx');
 const helmet = require('helmet');
@@ -143,22 +148,25 @@ app.use(session({
 // Template engine setup (simple HTML serving)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// CSRF Protection setup
-const csrfProtection = csrf({
-    cookie: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
-    }
-});
+// CSRF Protection setup (disabled for desktop mode)
+const csrfProtection = process.env.AEMS_MODE === 'desktop' ?
+    (req, res, next) => next() :
+    csrf({
+        cookie: {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        }
+    });
 
 // Skip CSRF for certain routes (like SSE endpoints)
 const skipCSRF = (req, res, next) => {
     // Skip CSRF for server-sent events and all GET requests
-    // For now, also skip CSRF for development to avoid configuration issues
+    // Skip CSRF for desktop mode and development to avoid configuration issues
     if (req.path === '/api/notifications/stream' ||
         req.method === 'GET' ||
-        process.env.NODE_ENV === 'development') {
+        process.env.NODE_ENV === 'development' ||
+        process.env.AEMS_MODE === 'desktop') {
         return next();
     }
     return csrfProtection(req, res, next);
@@ -170,23 +178,40 @@ const skipCSRF = (req, res, next) => {
 
 // Input sanitization middleware
 const sanitizeInput = (req, res, next) => {
-    // Sanitize request body
-    if (req.body && typeof req.body === 'object') {
-        Object.keys(req.body).forEach(key => {
-            if (typeof req.body[key] === 'string') {
-                req.body[key] = DOMPurify.sanitize(req.body[key]);
-            }
-        });
-    }
+    try {
+        // Skip sanitization for API keys and sensitive data
+        const skipSanitization = [
+            '/api/desktop/test-connection',
+            '/api/desktop/settings'
+        ];
 
-    // Sanitize query parameters
-    Object.keys(req.query).forEach(key => {
-        if (typeof req.query[key] === 'string') {
-            req.query[key] = DOMPurify.sanitize(req.query[key]);
+        if (skipSanitization.some(path => req.path.includes(path))) {
+            return next();
         }
-    });
 
-    next();
+        // Sanitize request body
+        if (req.body && typeof req.body === 'object') {
+            Object.keys(req.body).forEach(key => {
+                if (typeof req.body[key] === 'string') {
+                    req.body[key] = DOMPurify.sanitize(req.body[key]);
+                }
+            });
+        }
+
+        // Sanitize query parameters
+        if (req.query && typeof req.query === 'object') {
+            Object.keys(req.query).forEach(key => {
+                if (typeof req.query[key] === 'string') {
+                    req.query[key] = DOMPurify.sanitize(req.query[key]);
+                }
+            });
+        }
+
+        next();
+    } catch (error) {
+        console.error('Sanitization error:', error);
+        next();
+    }
 };
 
 // Validation error handler
@@ -1008,6 +1033,140 @@ app.put('/api/settings', async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update settings' });
+    }
+});
+
+// ==========================================
+// DESKTOP SETTINGS ROUTES
+// ==========================================
+
+// Get desktop settings
+app.get('/api/desktop/settings', (req, res) => {
+    try {
+        if (process.env.AEMS_MODE !== 'desktop') {
+            return res.status(404).json({ error: 'Desktop settings only available in desktop mode' });
+        }
+
+        const DesktopSettings = require('./lib/desktop-settings');
+        const settingsManager = new DesktopSettings();
+
+        const settings = settingsManager.getSettings();
+        const config = settingsManager.isConfigured();
+        const missing = settingsManager.getMissingSettings();
+        const message = settingsManager.getSetupMessage();
+
+        res.json({
+            settings,
+            isConfigured: config.isFullyConfigured,
+            isMinimallyConfigured: config.isMinimallyConfigured,
+            hasGoogle: config.hasGoogle,
+            hasOpenAI: config.hasOpenAI,
+            missingSettings: missing,
+            setupMessage: message,
+            envFile: settingsManager.getEnvFilePath()
+        });
+    } catch (error) {
+        console.error('Failed to get desktop settings:', error);
+        res.status(500).json({ error: 'Failed to get desktop settings' });
+    }
+});
+
+// Update desktop settings
+app.put('/api/desktop/settings', (req, res) => {
+    try {
+        if (process.env.AEMS_MODE !== 'desktop') {
+            return res.status(404).json({ error: 'Desktop settings only available in desktop mode' });
+        }
+
+        const DesktopSettings = require('./lib/desktop-settings');
+        const settingsManager = new DesktopSettings();
+        const { settings } = req.body;
+
+        if (!settings || typeof settings !== 'object') {
+            return res.status(400).json({ error: 'Invalid settings data' });
+        }
+
+        // Validate settings
+        const validationErrors = [];
+        for (const [key, value] of Object.entries(settings)) {
+            if (value && !settingsManager.validateSetting(key, value)) {
+                validationErrors.push(`Invalid ${key} format`);
+            }
+        }
+
+        if (validationErrors.length > 0) {
+            return res.status(400).json({ error: 'Validation failed', details: validationErrors });
+        }
+
+        // Update settings
+        const result = settingsManager.updateSettings(settings);
+
+        if (!result.success) {
+            return res.status(500).json({ error: result.error || 'Failed to save settings' });
+        }
+
+        // If Google OAuth credentials were updated, reinitialize Gmail service
+        if (settings.GOOGLE_CLIENT_ID || settings.GOOGLE_CLIENT_SECRET) {
+            try {
+                // Reinitialize Gmail service OAuth client
+                gmailService.reinitializeOAuth();
+                console.log('🔄 Gmail service OAuth client reinitialized with new credentials');
+            } catch (error) {
+                console.error('Failed to reinitialize Gmail OAuth client:', error);
+            }
+        }
+
+        // Return updated status
+        const config = settingsManager.isConfigured();
+        const missing = settingsManager.getMissingSettings();
+        const message = settingsManager.getSetupMessage();
+
+        res.json({
+            success: true,
+            isConfigured: config.isFullyConfigured,
+            isMinimallyConfigured: config.isMinimallyConfigured,
+            hasGoogle: config.hasGoogle,
+            hasOpenAI: config.hasOpenAI,
+            missingSettings: missing,
+            setupMessage: message,
+            message: 'Settings updated successfully'
+        });
+    } catch (error) {
+        console.error('Failed to update desktop settings:', error);
+        res.status(500).json({ error: 'Failed to update desktop settings' });
+    }
+});
+
+// Test API connections
+app.post('/api/desktop/test-connection', async (req, res) => {
+    try {
+        if (process.env.AEMS_MODE !== 'desktop') {
+            return res.status(404).json({ error: 'Desktop settings only available in desktop mode' });
+        }
+
+        const { service, apiKey, clientId, clientSecret } = req.body;
+
+        if (service === 'openai') {
+            if (!apiKey || !apiKey.startsWith('sk-')) {
+                return res.status(400).json({ error: 'Invalid OpenAI API key format' });
+            }
+            res.json({ success: true, message: 'OpenAI API key format is valid' });
+
+        } else if (service === 'google') {
+            if (!clientId || !clientId.includes('.apps.googleusercontent.com')) {
+                return res.status(400).json({ error: 'Invalid Google Client ID format' });
+            }
+            if (!clientSecret || !clientSecret.startsWith('GOCSPX-')) {
+                return res.status(400).json({ error: 'Invalid Google Client Secret format' });
+            }
+            res.json({ success: true, message: 'Google OAuth credentials format is valid' });
+
+        } else {
+            res.status(400).json({ error: 'Unknown service type' });
+        }
+    } catch (error) {
+        console.error('Failed to test connection:', error);
+        res.status(500).json({ error: 'Failed to test connection' });
     }
 });
 

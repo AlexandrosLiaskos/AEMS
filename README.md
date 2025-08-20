@@ -1,24 +1,34 @@
-# Agentic Email Management System (AEMS)
+# AEMS - Agentic Email Management System
+AEMS is a secure, single‑user and AI-powered email operations app. Emails of pre-defined categories (customer inquiries and invoices) are automatically fetched from Gmail, AI‑processed for data extraction, and guided through a three‑stage workflow: Fetched → Review → Managed, for human-in-the-loop review and management.
 
-A management system that leverages AI to automatically categorize, extract, and manage email data from Gmail accounts. Built with Node.js, Express, and vanilla JavaScript, AEMS provides a secure, single-user solution for intelligent email processing.
+AEMS runs locally in your browser and is distributed as a Windows bundle (AEMS.exe) for one-click experience and zero‑setup requirements. Built on Node.js, Express and Vanilla HTML/CSS/JS, while data is stored locally under `%AppData%`.
+
+### What AEMS does
+- Connects to your Gmail account via `Google OAuth2` and **fetches emails** safely
+- Uses `LangChain + OpenAI` to **automatically categorize** emails (Customer Inquiry, Invoice, Other) and **extract key business data** from emails and PDFs depending on category (customer name, email, phone, company, service interest; invoice number, date, customer, amount, VAT)
+- Guides each email through a three‑stage **human-in-the-loop** workflow: Fetched → Review → Managed (plus Recycle Bin)
+- Offers a Radix‑inspired **data table UI** featured with **CRUD, search, filter, and sort** functionality
+- Provides **real-time notifications** for new fetched emails
+- Allows you to **export managed emails** to `XLSX` for further processing
+- Read more in [`✨ Key Features`](#✨-key-features)
+
+
+### Windows bundle at a glance
+- One file: `AEMS.exe` launches the local server and opens your browser at `http://localhost:3000`
+- Stores data and settings under `%AppData%/AEMS`
+- First‑run setup checks your configuration and guides you through entering the OpenAI key and Google OAuth credentials
 
 ## 📋 Table of Contents
 
-- [✨ Features](#✨-features)
+- [✨ Key Features](#✨-key-features)
 - [💻 System Requirements](#💻-system-requirements)
-- [🏗️ Architecture Overview](#️🏗️-architecture-overview)
-- [🚀 Installation](#🚀-installation)
-- [⚙️ Configuration](#️⚙️-configuration)
-- [📖 Usage](#📖-usage)
-- [🔌 API Documentation](#🔌-api-documentation)
-- [🔒 Security](#🔒-security)
+- [⚙️ Setup & Configuration](#️⚙️-setup--configuration)
+- [📖 How to Use AEMS](#📖-how-to-use-aems)
+- [🔒 Security & Privacy](#🔒-security--privacy)
 - [🐛 Troubleshooting](#🐛-troubleshooting)
-- [👨‍💻 Development](#️👨‍💻-development)
-- [📚 Additional Resources](#📚-additional-resources)
-- [📝 Changelog](#📝-changelog)
-- [📄 License](#📄-license)
+- [� Support](#�-support)
 
-## ✨ Features
+## ✨ Key Features
 
 - ✅ **Gmail Integration**: OAuth2-based secure Gmail connection with automatic token refresh
 - ✅ **AI-Powered Categorization**: Automatic email classification using OpenAI GPT-3.5 with LangChain
@@ -26,7 +36,7 @@ A management system that leverages AI to automatically categorize, extract, and 
 - ✅ **Three-Stage Workflow**: Fetched → Review → Managed email pipeline
 - ✅ **Intelligent Data Extraction**: AI-powered extraction of customer and invoice information
 - ✅ **Bulk Operations**: Process multiple emails simultaneously with batch approvals/declines
-- ✅ **Advanced Export/Import**: XLSX data export with multi-tab support by category
+- ✅ **Advanced Export**: XLSX data export with multi-tab support by category
 - ✅ **Real-time Notifications**: New Emails fetched real-time notifications
 - ✅ **Recycle Bin**: Soft delete with recovery options and permanent deletion
 - ✅ **PDF Content Processing**: AI data extraction from PDF attachments (invoices, documents)
@@ -49,20 +59,24 @@ A management system that leverages AI to automatically categorize, extract, and 
 - ✅ **Memory Management**: Automatic cleanup, leak prevention, and resource optimization
 - ✅ **Table Search**: Full-text search across all email fields
 - ✅ **Multi-Column Sorting**: Click-to-sort functionality on all table headers with visual sort indicators
-- ✅ **Smart Filtering**: Category, date range, and sender filters with real-time statistics and one-click clear
+- ✅ **Smart Filtering**: Category, date range, and sender filters with real-time statistics and one-click clear.
 
 ## 💻 System Requirements
 
-### Prerequisites
-- **Node.js**: v14.0.0 or higher (v18.x recommended)
-- **npm**: v6.0.0 or higher
-- **Operating System**: Windows, macOS, or Linux
-- **Memory**: Minimum 1+GB RAM
-- **Storage**: 100+MB
+### For Windows Bundle
+- **Operating System**: Windows 10 or later
+- **Memory**: Minimum 1GB RAM
+- **Storage**: 100MB free space
 - **Browser**: Chrome, Firefox, Safari, or Edge
 
-### External Services
-- **Gmail Account**: Required for email fetching
+### For Source Installation
+- **Node.js**: v18.x or higher
+- **Operating System**: Windows, macOS, or Linux
+- **Memory**: Minimum 1GB RAM
+- **Storage**: 100MB free space
+
+### Required External Services
+- **Gmail Account**: For email access
 - **Google Cloud Console Account**: For OAuth2 credentials
 - **OpenAI API Account**: For AI processing features
 
@@ -112,29 +126,16 @@ data/
 └── users.json         # User authentication data
 ```
 
-## 🚀 Installation
+## 📖 Usage
 
-### Step 1: Clone the Repository
-```bash
-git clone https://github.com/your-username/aems-02.git
-cd aems-02
-```
+### First-Run Setup Flow
 
-### Step 2: Install Dependencies
-```bash
-npm install
-```
+On first run or when credentials are missing:
+1. App detects missing configuration
+2. Automatically shows Settings page
+3. You enter credentials; they’re saved to `%AppData%/AEMS/.env`
+4. App returns to the dashboard once ready
 
-### Step 3: Set Up Environment Variables
-```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit .env with your credentials
-nano .env  # or use your preferred editor
-```
-
-### Step 4: Configure Google OAuth2
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
@@ -148,69 +149,14 @@ nano .env  # or use your preferred editor
    - Add authorized redirect URI: `http://localhost:3000/auth/google/callback`
 5. Copy Client ID and Client Secret to `.env`
 
-### Step 5: Configure OpenAI API
+### Configure OpenAI API
 
 1. Sign up at [OpenAI Platform](https://platform.openai.com/)
 2. Navigate to API Keys section
 3. Create a new API key
 4. Copy the key to `OPENAI_API_KEY` in `.env`
 
-### Step 6: Start the Application
-```bash
-# Production mode
-npm start
-
-# Development mode with auto-reload
-npm run dev
-```
-
-The application will be available at `http://localhost:3000`
-
-## ⚙️ Configuration
-
-### Essential Environment Variables
-
-```env
-# OpenAI Configuration
-OPENAI_API_KEY=sk-your-openai-api-key-here
-
-# Google OAuth2
-GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-client-secret-here
-GOOGLE_REDIRECT_URL=http://localhost:3000/auth/google/callback
-
-# Server Settings
-PORT=3000
-SESSION_SECRET=generate-secure-random-string-at-least-32-characters
-SESSION_TIMEOUT=3600000  # 1 hour in milliseconds
-
-# Gmail API Settings
-MAX_EMAILS_PER_SYNC=50
-SYNC_INTERVAL_MINUTES=5
-
-# AI Processing
-AI_BATCH_SIZE=5
-AI_BATCH_DELAY=1000
-AI_DAILY_REQUEST_LIMIT=1000
-AI_EXTRACTION_DAILY_LIMIT=500
-AI_EXTRACTION_BATCH_SIZE=2
-AI_EXTRACTION_BATCH_DELAY=3000
-
-# Backup Configuration
-MAX_BACKUPS=7
-BACKUP_INTERVAL_HOURS=24
-
-# Security Settings
-NODE_ENV=production  # Use 'development' for local development
-```
-
-See `.env.example` for complete configuration options.
-
-## 📖 Usage
-
-### Core Workflow
-
-### 1. Initial Setup & Authentication
+### Authentication
 
 1. **Connect Gmail Account**:
    - Click "Connect Gmail" button in the header
@@ -661,6 +607,57 @@ Currently, the project uses manual testing. Future improvements:
 - ✅ Basic security implementation
 
 ## 📄 License
+
+## 🪟 Windows EXE Bundle
+
+AEMS ships with a packaged Windows executable for easy distribution.
+
+- Build command: `npm run build` (uses pkg to create `dist/AEMS.exe`)
+- Artifacts:
+  - `dist/AEMS.exe` — standalone desktop server
+  - `dist/Start-AEMS.bat` — convenience launcher that opens the app URL
+- First launch opens your default browser at `http://localhost:3000` and prints runtime info in the console.
+
+Notes
+- You may see non-fatal warnings from pkg regarding langchain bytecode. These do not affect functionality.
+- If `AEMS.exe` appears locked, ensure no running instance exists before rebuilding.
+
+## 📂 Windows AppData Storage
+
+To behave like a professional desktop app, AEMS stores user data and configuration under the current user’s AppData directory:
+
+- Data directory: `%AppData%/AEMS/aems-data`
+- Settings file: `%AppData%/AEMS/.env`
+- Backups: `%AppData%/AEMS/backups`
+
+This keeps project files clean and supports per-user isolation. At startup, AEMS prints these paths for clarity.
+
+## 🧭 Automatic Setup Wizard & Requirements
+
+On first run or when critical configuration is missing, AEMS automatically:
+
+1. Detects missing configuration (OpenAI or Google credentials)
+2. Guides you to the in-app Settings page
+3. Validates entries and saves them to `%AppData%/AEMS/.env`
+4. Returns you to the dashboard once ready
+
+Required credentials
+- OpenAI
+  - `OPENAI_API_KEY`
+- Google OAuth (for Gmail)
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+  - Redirect URI must be set in Google Console to `http://localhost:3000/auth/google/callback`
+
+Where to enter credentials
+- In-app: Settings → enter keys and Save
+- Or edit `%AppData%/AEMS/.env` directly using a text editor and restart AEMS
+
+Troubleshooting setup
+- If Settings don’t show your saved values when revisiting, reload the Settings page; the app re-fetches and repopulates values from the server
+- Ensure no extra quotes or spaces are present in the `.env`
+- Check the console window for any validation messages
+
 
 MIT License - See [LICENSE](LICENSE) file for details.
 

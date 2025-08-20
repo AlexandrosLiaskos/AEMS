@@ -1,0 +1,156 @@
+<!-- Settings Page -->
+<link rel="stylesheet" href="/css/settings.css">
+
+<div class="container dashboard">
+    <!-- Settings Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="header-text">
+                <h1 class="dashboard-title">
+                    <i class="fas fa-cog" aria-hidden="true"></i> Settings
+                </h1>
+                <p class="dashboard-description">Configure your API credentials and application preferences</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="loadSettings()" title="Reload settings">
+                    <i class="fas fa-refresh" aria-hidden="true"></i>
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="saveSettings()">
+                    <i class="fas fa-save" aria-hidden="true"></i> Save
+                </button>
+            </div>
+        </div>
+    </header>
+
+
+
+    <!-- API Configuration -->
+    <main class="settings-grid">
+        <!-- Google OAuth Card -->
+        <section class="card" aria-labelledby="google-oauth-title">
+            <div class="card-header">
+                <div class="flex justify-between items-center">
+                    <h2 id="google-oauth-title" class="card-title">
+                        <i class="fab fa-google" aria-hidden="true"></i> Google OAuth
+                    </h2>
+                    <span id="googleStatus" class="service-status missing" role="status" aria-live="polite">
+                        <i class="fas fa-times" aria-hidden="true"></i> Not configured
+                    </span>
+                </div>
+                <p class="card-description">Required for Gmail integration</p>
+            </div>
+            <div class="card-content">
+                <div class="form-group">
+                    <label for="googleClientId" class="form-label">Client ID</label>
+                    <input
+                        type="text"
+                        id="googleClientId"
+                        class="form-control"
+                        placeholder="123456789-abc.apps.googleusercontent.com"
+                        aria-describedby="google-client-id-help"
+                        autocomplete="off"
+                    >
+                    <div id="google-client-id-help" class="form-text">
+                        Get from <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Google Cloud Console</a>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="googleClientSecret" class="form-label">Client Secret</label>
+                    <div class="input-group">
+                        <input
+                            type="password"
+                            id="googleClientSecret"
+                            class="form-control"
+                            placeholder="GOCSPX-..."
+                            aria-describedby="google-client-secret-toggle"
+                            autocomplete="new-password"
+                        >
+                        <button
+                            type="button"
+                            id="google-client-secret-toggle"
+                            class="btn-toggle-password"
+                            onclick="togglePassword('googleClientSecret')"
+                            aria-label="Toggle password visibility"
+                        >
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+
+        <!-- OpenAI Card -->
+        <section class="card" aria-labelledby="openai-title">
+            <div class="card-header">
+                <div class="flex justify-between items-center">
+                    <h2 id="openai-title" class="card-title">
+                        <i class="fas fa-robot" aria-hidden="true"></i> OpenAI
+                    </h2>
+                    <span id="openaiStatus" class="service-status missing" role="status" aria-live="polite">
+                        <i class="fas fa-times" aria-hidden="true"></i> Not configured
+                    </span>
+                </div>
+                <p class="card-description">Enables AI-powered email categorization</p>
+            </div>
+            <div class="card-content">
+                <div class="form-group">
+                    <label for="openaiApiKey" class="form-label">API Key</label>
+                    <div class="input-group">
+                        <input
+                            type="password"
+                            id="openaiApiKey"
+                            class="form-control"
+                            placeholder="sk-..."
+                            aria-describedby="openai-api-key-help openai-api-key-toggle"
+                            autocomplete="new-password"
+                        >
+                        <button
+                            type="button"
+                            id="openai-api-key-toggle"
+                            class="btn-toggle-password"
+                            onclick="togglePassword('openaiApiKey')"
+                            aria-label="Toggle password visibility"
+                        >
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div id="openai-api-key-help" class="form-text">
+                        Get from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">OpenAI Platform</a>
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+// Initialize settings when content is loaded
+(function() {
+    'use strict';
+
+    function initializeSettingsPage() {
+        if (typeof loadSettings === 'function') {
+            loadSettings();
+        } else {
+            // Wait for settings script to load
+            document.addEventListener('settingsScriptLoaded', function() {
+                if (typeof loadSettings === 'function') {
+                    loadSettings();
+                }
+            });
+        }
+    }
+
+    // Initialize immediately if DOM is ready, otherwise wait
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeSettingsPage);
+    } else {
+        initializeSettingsPage();
+    }
+})();
+</script>

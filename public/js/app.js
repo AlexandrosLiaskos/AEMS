@@ -16,6 +16,14 @@ class AEMS {
 
     async init() {
         this.initializeComponents();
+
+        // Check if this is setup mode
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('setup') === 'true') {
+            this.showSetupPage();
+            return;
+        }
+
         await this.checkAuth();
         await this.fetchCSRFToken();
         this.bindEvents();
@@ -377,6 +385,9 @@ class AEMS {
     async showDashboard() {
         this.currentView = 'dashboard';
 
+        // Reset header to dashboard state
+        this.resetHeaderForDashboard();
+
         try {
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = `
@@ -428,6 +439,13 @@ class AEMS {
               <div id="emailTableContainer">
                 <div id="emailTable"></div>
               </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="dashboard-actions" style="margin-top: 2rem;">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
             </div>
           </div>
         </div>
@@ -1184,6 +1202,14 @@ class AEMS {
                     this.syncEmails();
                 }
             }
+
+            // Handle settings button click
+            if (e.target.closest('#settingsBtn')) {
+                e.preventDefault();
+                this.showSettings();
+            }
+
+
 
             // Handle sign out button click
             if (e.target.closest('#signOutBtn')) {
@@ -2840,6 +2866,146 @@ class AEMS {
 
 
 
+
+
+    async showSetupPage() {
+        try {
+            // Load the setup wizard components
+            await this.loadSetupComponents();
+
+            // Start the setup wizard directly
+            const wizard = new SetupWizard();
+            const result = await wizard.start();
+
+            // Setup completed, redirect to Gmail OAuth or dashboard
+            if (result && (result.googleClientId || result.googleClientSecret)) {
+                // Redirect to Gmail OAuth
+                window.location.href = '/auth/google';
+            } else {
+                // No Google OAuth configured, go to dashboard
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error('Failed to show setup page:', error);
+            // Fallback to settings page
+            await this.showSettings();
+        }
+    }
+
+    async loadSetupComponents() {
+        // Load dialog CSS
+        if (!document.querySelector('link[href="/components/ui/dialog.css"]')) {
+            const dialogCSS = document.createElement('link');
+            dialogCSS.rel = 'stylesheet';
+            dialogCSS.href = '/components/ui/dialog.css';
+            document.head.appendChild(dialogCSS);
+        }
+
+        // Load dialog JS
+        if (!window.Dialog) {
+            await this.loadScript('/components/ui/dialog.js');
+        }
+
+        // Load setup wizard JS
+        if (!window.SetupWizard) {
+            await this.loadScript('/components/setup-wizard.js');
+        }
+    }
+
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    async showSettings() {
+        this.currentView = 'settings';
+
+        try {
+            // Load settings page content
+            const response = await fetch('/settings.html');
+            if (!response.ok) {
+                throw new Error('Failed to load settings page');
+            }
+
+            const settingsHTML = await response.text();
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = settingsHTML;
+
+            // Update header to show we're in settings
+            this.updateHeaderForSettings();
+
+            // Load settings JavaScript if not already loaded
+            if (!window.settingsLoaded) {
+                const script = document.createElement('script');
+                script.src = '/js/settings.js';
+                script.onload = () => {
+                    window.settingsLoaded = true;
+                    // Initialize settings after script loads
+                    if (window.initializeSettings) {
+                        window.initializeSettings();
+                    }
+                };
+                document.head.appendChild(script);
+            } else {
+                // If already loaded, re-fetch settings to populate the fresh DOM
+                if (window.loadSettings) {
+                    window.loadSettings();
+                } else if (window.initializeSettings) {
+                    // Fallback in case loadSettings is not exposed yet
+                    window.initializeSettings();
+                }
+            }
+
+            // Update page title
+            document.title = 'Settings - AEMS';
+
+        } catch (error) {
+            console.error('Failed to load settings:', error);
+            this.addNotification('Settings Error', 'Failed to load settings page', 'error');
+        }
+    }
+
+    updateHeaderForSettings() {
+        // Update sync button to show it's disabled in settings
+        const syncBtn = document.getElementById('syncBtn');
+        if (syncBtn) {
+            syncBtn.style.opacity = '0.5';
+            syncBtn.style.pointerEvents = 'none';
+            syncBtn.title = 'Sync not available in settings';
+        }
+
+        // Highlight settings button
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) {
+            settingsBtn.classList.add('btn-primary');
+            settingsBtn.classList.remove('btn-ghost');
+        }
+    }
+
+    resetHeaderForDashboard() {
+        // Reset sync button
+        const syncBtn = document.getElementById('syncBtn');
+        if (syncBtn) {
+            syncBtn.style.opacity = '1';
+            syncBtn.style.pointerEvents = 'auto';
+            syncBtn.title = 'Sync Emails';
+        }
+
+        // Reset settings button
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) {
+            settingsBtn.classList.remove('btn-primary');
+            settingsBtn.classList.add('btn-ghost');
+        }
+
+        // Update page title
+        document.title = 'AEMS - Email Management System';
+    }
 }
 
 // Simple component classes
