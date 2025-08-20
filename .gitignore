@@ -49,8 +49,8 @@ Thumbs.db
 *.swo
 *~
 
-# Claude Code settings
-.claude/settings.local.json
+# Large files
+AEMS.exe
 
 # Temporary files
 *.tmp
