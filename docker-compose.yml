@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  aems:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aems-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"  # Frontend
+      - "3001:3001"  # Backend API
+    volumes:
+      # Persistent data storage
+      - aems_data:/app/data
+      - aems_logs:/app/logs
+      - aems_backups:/app/backups
+      - aems_cache:/app/cache
+      # Optional: Mount config from host
+      # - ./config/.env:/app/.env:ro
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - FRONTEND_URL=http://localhost:3000
+      - DATABASE_TYPE=json
+      - DATABASE_PATH=/app/data
+      - LOG_FILE=/app/logs/aems.log
+      - BACKUP_ENABLED=true
+      # Add your API keys here or use docker secrets
+      # - OPENAI_API_KEY=your_openai_key
+      # - GOOGLE_CLIENT_ID=your_google_client_id
+      # - GOOGLE_CLIENT_SECRET=your_google_client_secret
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - aems_network
+
+  # Optional: Nginx reverse proxy for production
+  nginx:
+    image: nginx:alpine
+    container_name: aems-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - aems
+    networks:
+      - aems_network
+    profiles:
+      - production
+
+volumes:
+  aems_data:
+    driver: local
+  aems_logs:
+    driver: local
+  aems_backups:
+    driver: local
+  aems_cache:
+    driver: local
+
+networks:
+  aems_network:
+    driver: bridge

@@ -1,0 +1,393 @@
+.
+├── apps
+│  ├── backend
+│  │  ├── dist
+│  │  │  └── main.js
+│  │  ├── nest-cli.json
+│  │  ├── package-lock.json
+│  │  ├── package.json
+│  │  ├── src
+│  │  │  ├── app.module.ts
+│  │  │  ├── common
+│  │  │  │  ├── common.module.ts
+│  │  │  │  ├── errors
+│  │  │  │  │  └── custom-errors.ts
+│  │  │  │  ├── filters
+│  │  │  │  │  └── global-exception.filter.ts
+│  │  │  │  ├── guards
+│  │  │  │  │  └── setup-complete.guard.ts
+│  │  │  │  ├── interceptors
+│  │  │  │  │  └── error-handling.interceptor.ts
+│  │  │  │  ├── pipes
+│  │  │  │  │  └── validation.pipe.ts
+│  │  │  │  ├── services
+│  │  │  │  │  ├── __tests__
+│  │  │  │  │  │  ├── app-data.service.spec.ts
+│  │  │  │  │  │  ├── error-handler.service.spec.ts
+│  │  │  │  │  │  └── lock-manager.service.spec.ts
+│  │  │  │  │  ├── app-data.service.ts
+│  │  │  │  │  ├── crypto.service.ts
+│  │  │  │  │  ├── date.service.ts
+│  │  │  │  │  ├── environment-initializer.service.ts
+│  │  │  │  │  ├── environment.service.ts
+│  │  │  │  │  ├── error-handler.service.ts
+│  │  │  │  │  ├── event.service.ts
+│  │  │  │  │  ├── file.service.ts
+│  │  │  │  │  ├── lock-manager.service.ts
+│  │  │  │  │  ├── logger.service.ts
+│  │  │  │  │  └── validation.service.ts
+│  │  │  │  └── types
+│  │  │  │     └── index.ts
+│  │  │  ├── config
+│  │  │  │  ├── ai.config.ts
+│  │  │  │  ├── app.config.ts
+│  │  │  │  ├── auth.config.ts
+│  │  │  │  ├── database.config.ts
+│  │  │  │  └── gmail.config.ts
+│  │  │  ├── database
+│  │  │  │  ├── database.module.ts
+│  │  │  │  ├── entities
+│  │  │  │  │  ├── attachment.entity.ts
+│  │  │  │  │  ├── audit-log.entity.ts
+│  │  │  │  │  ├── classification.entity.ts
+│  │  │  │  │  ├── email-message.entity.ts
+│  │  │  │  │  ├── extraction.entity.ts
+│  │  │  │  │  ├── index.ts
+│  │  │  │  │  ├── notification.entity.ts
+│  │  │  │  │  ├── user.entity.ts
+│  │  │  │  │  └── workflow-transition.entity.ts
+│  │  │  │  ├── json-file-datasource.ts
+│  │  │  │  ├── migrations
+│  │  │  │  │  ├── migration.interface.ts
+│  │  │  │  │  ├── migration.module.ts
+│  │  │  │  │  ├── migration.service.ts
+│  │  │  │  │  └── migrations
+│  │  │  │  │     ├── 20241223120000-initial-schema.migration.ts
+│  │  │  │  │     ├── 20241223120001-add-user-roles.migration.ts
+│  │  │  │  │     └── 20241223120002-add-email-workflow-state.migration.ts
+│  │  │  │  ├── repositories
+│  │  │  │  │  ├── base.repository.ts
+│  │  │  │  │  ├── classification.repository.ts
+│  │  │  │  │  ├── email-message.repository.ts
+│  │  │  │  │  ├── extraction.repository.ts
+│  │  │  │  │  ├── repository.module.ts
+│  │  │  │  │  └── user.repository.ts
+│  │  │  │  └── services
+│  │  │  │     ├── backup.service.ts
+│  │  │  │     ├── file-manager.service.ts
+│  │  │  │     └── lock-manager.service.ts
+│  │  │  ├── graphql
+│  │  │  │  ├── graphql.module.ts
+│  │  │  │  ├── resolvers
+│  │  │  │  │  ├── audit-log.resolver.ts
+│  │  │  │  │  ├── classification.resolver.ts
+│  │  │  │  │  ├── email.resolver.ts
+│  │  │  │  │  ├── extraction.resolver.ts
+│  │  │  │  │  ├── notification.resolver.ts
+│  │  │  │  │  └── user.resolver.ts
+│  │  │  │  └── scalars
+│  │  │  │     ├── datetime.scalar.ts
+│  │  │  │     └── json.scalar.ts
+│  │  │  ├── main.ts
+│  │  │  └── modules
+│  │  │     ├── ai
+│  │  │     │  ├── ai.module.ts
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── ai.controller.ts
+│  │  │     │  ├── dto
+│  │  │     │  │  └── ai.dto.ts
+│  │  │     │  ├── resolvers
+│  │  │     │  │  └── ai.resolver.ts
+│  │  │     │  ├── services
+│  │  │     │  │  ├── __tests__
+│  │  │     │  │  │  ├── cache.service.spec.ts
+│  │  │     │  │  │  └── prompt.service.spec.ts
+│  │  │     │  │  ├── ai.service.ts
+│  │  │     │  │  ├── cache.service.ts
+│  │  │     │  │  ├── classification.service.ts
+│  │  │     │  │  ├── cost-tracking.service.ts
+│  │  │     │  │  ├── extraction.service.ts
+│  │  │     │  │  ├── openai.service.ts
+│  │  │     │  │  ├── prompt.service.ts
+│  │  │     │  │  └── validation.service.ts
+│  │  │     │  └── tasks
+│  │  │     │     └── ai-processing.task.ts
+│  │  │     ├── audit
+│  │  │     │  ├── audit.module.ts
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── audit.controller.ts
+│  │  │     │  └── services
+│  │  │     │     └── audit.service.ts
+│  │  │     ├── auth
+│  │  │     │  ├── auth.module.ts
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── auth.controller.ts
+│  │  │     │  ├── decorators
+│  │  │     │  │  ├── current-user.decorator.ts
+│  │  │     │  │  └── public.decorator.ts
+│  │  │     │  ├── dto
+│  │  │     │  │  └── auth.dto.ts
+│  │  │     │  ├── guards
+│  │  │     │  │  ├── google-auth.guard.ts
+│  │  │     │  │  ├── jwt-auth.guard.ts
+│  │  │     │  │  ├── local-auth.guard.ts
+│  │  │     │  │  └── roles.guard.ts
+│  │  │     │  ├── resolvers
+│  │  │     │  │  └── auth.resolver.ts
+│  │  │     │  ├── services
+│  │  │     │  │  ├── __tests__
+│  │  │     │  │  │  └── session.service.spec.ts
+│  │  │     │  │  ├── auth.service.ts
+│  │  │     │  │  ├── google-auth.service.ts
+│  │  │     │  │  ├── password.service.ts
+│  │  │     │  │  ├── session.service.ts
+│  │  │     │  │  └── token.service.ts
+│  │  │     │  └── strategies
+│  │  │     │     ├── google.strategy.ts
+│  │  │     │     ├── jwt.strategy.ts
+│  │  │     │     └── local.strategy.ts
+│  │  │     ├── backup
+│  │  │     │  ├── backup.module.ts
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── backup.controller.ts
+│  │  │     │  └── services
+│  │  │     │     └── backup.service.ts
+│  │  │     ├── email
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── email.controller.ts
+│  │  │     │  ├── email.module.ts
+│  │  │     │  └── services
+│  │  │     │     └── attachment.service.ts
+│  │  │     ├── export
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── export.controller.ts
+│  │  │     │  ├── export.module.ts
+│  │  │     │  └── services
+│  │  │     │     └── export.service.ts
+│  │  │     ├── gmail
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── gmail.controller.ts
+│  │  │     │  ├── dto
+│  │  │     │  │  └── gmail.dto.ts
+│  │  │     │  ├── gmail.module.ts
+│  │  │     │  ├── resolvers
+│  │  │     │  │  └── gmail.resolver.ts
+│  │  │     │  ├── services
+│  │  │     │  │  ├── attachment.service.ts
+│  │  │     │  │  ├── email-parser.service.ts
+│  │  │     │  │  ├── gmail-auth.service.ts
+│  │  │     │  │  ├── gmail-quota.service.ts
+│  │  │     │  │  ├── gmail-sync.service.ts
+│  │  │     │  │  ├── gmail-webhook.service.ts
+│  │  │     │  │  └── gmail.service.ts
+│  │  │     │  └── tasks
+│  │  │     │     └── gmail-sync.task.ts
+│  │  │     ├── health
+│  │  │     │  ├── health.controller.ts
+│  │  │     │  └── health.module.ts
+│  │  │     ├── notification
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── notification.controller.ts
+│  │  │     │  ├── dto
+│  │  │     │  │  └── notification.dto.ts
+│  │  │     │  ├── notification.module.ts
+│  │  │     │  ├── resolvers
+│  │  │     │  │  └── notification.resolver.ts
+│  │  │     │  └── services
+│  │  │     │     ├── email-notification.service.ts
+│  │  │     │     ├── notification-delivery.service.ts
+│  │  │     │     ├── notification-preference.service.ts
+│  │  │     │     ├── notification-template.service.ts
+│  │  │     │     ├── notification.service.ts
+│  │  │     │     ├── push-notification.service.ts
+│  │  │     │     └── websocket-notification.service.ts
+│  │  │     ├── pipeline
+│  │  │     │  ├── pipeline-scheduler.service.ts
+│  │  │     │  ├── pipeline.controller.ts
+│  │  │     │  ├── pipeline.module.ts
+│  │  │     │  ├── pipeline.resolver.ts
+│  │  │     │  └── pipeline.service.ts
+│  │  │     ├── setup
+│  │  │     │  ├── controllers
+│  │  │     │  │  └── setup.controller.ts
+│  │  │     │  ├── services
+│  │  │     │  │  └── setup.service.ts
+│  │  │     │  └── setup.module.ts
+│  │  │     ├── websocket
+│  │  │     │  ├── guards
+│  │  │     │  │  └── ws-jwt.guard.ts
+│  │  │     │  ├── websocket.gateway.ts
+│  │  │     │  ├── websocket.module.ts
+│  │  │     │  └── websocket.service.ts
+│  │  │     └── workflow
+│  │  │        ├── controllers
+│  │  │        │  └── workflow.controller.ts
+│  │  │        ├── resolvers
+│  │  │        │  └── workflow.resolver.ts
+│  │  │        ├── services
+│  │  │        │  ├── workflow-engine.service.ts
+│  │  │        │  ├── workflow-rule.service.ts
+│  │  │        │  └── workflow.service.ts
+│  │  │        └── workflow.module.ts
+│  │  └── tsconfig.json
+│  └── frontend
+│     ├── components.json
+│     ├── index.html
+│     ├── package.json
+│     ├── postcss.config.js
+│     ├── src
+│     │  ├── App.tsx
+│     │  ├── components
+│     │  │  ├── auth
+│     │  │  │  ├── protected-route.tsx
+│     │  │  │  └── public-route.tsx
+│     │  │  ├── Dashboard
+│     │  │  │  ├── Dashboard.tsx
+│     │  │  │  ├── PipelineControls.tsx
+│     │  │  │  └── StatsCards.tsx
+│     │  │  ├── error-boundary.tsx
+│     │  │  ├── layout
+│     │  │  │  ├── app-layout.tsx
+│     │  │  │  ├── auth-layout.tsx
+│     │  │  │  ├── header.tsx
+│     │  │  │  └── sidebar.tsx
+│     │  │  ├── notifications
+│     │  │  │  └── notification-panel.tsx
+│     │  │  ├── setup
+│     │  │  │  └── setup-wizard-step.tsx
+│     │  │  └── ui
+│     │  │     ├── alert.tsx
+│     │  │     ├── badge.tsx
+│     │  │     ├── button.tsx
+│     │  │     ├── card.tsx
+│     │  │     ├── checkbox.tsx
+│     │  │     ├── input.tsx
+│     │  │     ├── label.tsx
+│     │  │     ├── loading-spinner.tsx
+│     │  │     ├── progress.tsx
+│     │  │     ├── select.tsx
+│     │  │     ├── separator.tsx
+│     │  │     ├── skeleton.tsx
+│     │  │     ├── switch.tsx
+│     │  │     ├── tabs.tsx
+│     │  │     └── textarea.tsx
+│     │  ├── hooks
+│     │  │  ├── use-setup.ts
+│     │  │  ├── useEmailStats.ts
+│     │  │  ├── usePipeline.ts
+│     │  │  └── useWebSocket.ts
+│     │  ├── lib
+│     │  │  └── api
+│     │  │     ├── client.ts
+│     │  │     ├── email.ts
+│     │  │     └── pipeline.ts
+│     │  ├── main.tsx
+│     │  ├── pages
+│     │  │  ├── auth
+│     │  │  │  ├── login-page.tsx
+│     │  │  │  └── setup-page.tsx
+│     │  │  ├── classifications
+│     │  │  │  └── classifications-page.tsx
+│     │  │  ├── dashboard
+│     │  │  │  └── dashboard-page.tsx
+│     │  │  ├── emails
+│     │  │  │  ├── email-detail-page.tsx
+│     │  │  │  └── emails-page.tsx
+│     │  │  ├── error
+│     │  │  │  └── not-found-page.tsx
+│     │  │  ├── extractions
+│     │  │  │  └── extractions-page.tsx
+│     │  │  ├── notifications
+│     │  │  │  └── notifications-page.tsx
+│     │  │  ├── profile
+│     │  │  │  └── profile-page.tsx
+│     │  │  ├── settings
+│     │  │  │  └── settings-page.tsx
+│     │  │  └── setup-page.tsx
+│     │  ├── providers
+│     │  │  ├── auth-provider.tsx
+│     │  │  ├── notification-provider.tsx
+│     │  │  ├── theme-provider.tsx
+│     │  │  └── toast-provider.tsx
+│     │  ├── services
+│     │  │  ├── api
+│     │  │  │  └── setup-api.ts
+│     │  │  ├── apollo-client.ts
+│     │  │  └── auth-service.ts
+│     │  ├── styles
+│     │  │  └── globals.css
+│     │  └── utils
+│     │     └── cn.ts
+│     ├── tailwind.config.js
+│     ├── tsconfig.json
+│     ├── tsconfig.node.json
+│     └── vite.config.ts
+├── CONTRIBUTING.md
+├── docker-compose.yml
+├── Dockerfile
+├── docs
+│  ├── backend
+│  │  ├── authentication.md
+│  │  ├── controllers.md
+│  │  ├── data-storage.md
+│  │  ├── email-processing.md
+│  │  ├── entities.md
+│  │  ├── error-handling.md
+│  │  ├── gmail-integration.md
+│  │  ├── graphql-schema.md
+│  │  ├── modules.md
+│  │  └── services.md
+│  ├── deployment-guide.md
+│  ├── development-scripts.md
+│  ├── frontend
+│  │  ├── api-integration.md
+│  │  ├── architecture.md
+│  │  ├── components.md
+│  │  ├── state-management.md
+│  │  └── ui-library.md
+│  ├── naming-conventions.md
+│  ├── production-setup-guide.md
+│  ├── project-structure.md
+│  ├── technology-stack.md
+│  └── testing-and-quality-report.md
+├── LICENSE
+├── package-lock.json
+├── package.json
+├── packages
+│  ├── constants
+│  │  ├── package.json
+│  │  ├── src
+│  │  │  ├── app.ts
+│  │  │  └── index.ts
+│  │  └── tsconfig.json
+│  ├── shared
+│  │  ├── package.json
+│  │  ├── src
+│  │  │  ├── index.ts
+│  │  │  └── utils.ts
+│  │  └── tsconfig.json
+│  ├── types
+│  │  ├── package.json
+│  │  ├── src
+│  │  │  ├── common.ts
+│  │  │  └── index.ts
+│  │  └── tsconfig.json
+│  ├── ui
+│  │  ├── package.json
+│  │  ├── src
+│  │  │  ├── components.tsx
+│  │  │  └── index.ts
+│  │  └── tsconfig.json
+│  ├── utils
+│  │  ├── package.json
+│  │  ├── src
+│  │  │  ├── helpers.ts
+│  │  │  └── index.ts
+│  │  └── tsconfig.json
+│  └── {shared,types,constants,utils,ui}
+├── pkg.config.json
+├── README.md
+├── scripts
+│  ├── build-production.js
+│  └── startup.js
+└── tree.txt

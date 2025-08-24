@@ -1,0 +1,38 @@
+{
+  "name": "aems",
+  "version": "2.0.0",
+  "description": "Automated Email Management System - Production Bundle",
+  "main": "dist/apps/backend/main.js",
+  "bin": "dist/apps/backend/main.js",
+  "pkg": {
+    "targets": [
+      "node18-win-x64",
+      "node18-macos-x64",
+      "node18-macos-arm64",
+      "node18-linux-x64",
+      "node18-linux-arm64"
+    ],
+    "outputPath": "dist/executables",
+    "assets": [
+      "dist/apps/frontend/**/*",
+      "apps/backend/src/database/migrations/**/*",
+      "apps/backend/src/database/seeds/**/*",
+      "node_modules/@nestjs/microservices/package.json",
+      "node_modules/@nestjs/websockets/package.json",
+      "node_modules/class-transformer/package.json",
+      "node_modules/class-validator/package.json"
+    ],
+    "scripts": [
+      "dist/apps/backend/**/*.js"
+    ],
+    "options": [
+      "--max-old-space-size=4096"
+    ]
+  },
+  "scripts": {
+    "pkg:build": "npm run build && pkg . --config pkg.config.json",
+    "pkg:build:win": "npm run build && pkg . --targets node18-win-x64 --config pkg.config.json",
+    "pkg:build:mac": "npm run build && pkg . --targets node18-macos-x64,node18-macos-arm64 --config pkg.config.json",
+    "pkg:build:linux": "npm run build && pkg . --targets node18-linux-x64,node18-linux-arm64 --config pkg.config.json"
+  }
+}

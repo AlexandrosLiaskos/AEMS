@@ -1,70 +1,120 @@
 {
-  "name": "aems",
-  "version": "1.0.0",
-  "description": "Agentic Email Management System",
-  "main": "main.js",
+  "name": "aems-monorepo",
+  "version": "2.0.0",
+  "description": "Automated Email Management System - AI-powered email organization and data extraction",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "desktop": "node desktop-app.js",
-    "build": "pkg . --targets node18-win-x64 --output dist/AEMS.exe",
-    "build-all": "pkg desktop-app.js --targets node18-win-x64,node18-macos-x64,node18-linux-x64 --out-path dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "install:backend": "cd apps/backend && npm install",
+    "install:frontend": "cd apps/frontend && npm install",
+
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd apps/backend && npm run start:dev",
+    "dev:frontend": "cd apps/frontend && npm run dev",
+
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd apps/backend && npm run build",
+    "build:frontend": "cd apps/frontend && npm run build",
+
+    "start": "node scripts/startup.js",
+    "start:backend": "cd apps/backend && npm run start:prod",
+    "start:frontend": "cd apps/frontend && npm run preview",
+    "start:production": "node scripts/startup.js",
+
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd apps/backend && npm run test",
+    "test:frontend": "cd apps/frontend && npm run test",
+    "test:e2e": "cd apps/backend && npm run test:e2e",
+
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd apps/backend && npm run lint",
+    "lint:frontend": "cd apps/frontend && npm run lint",
+    "lint:fix": "npm run lint:backend -- --fix && npm run lint:frontend -- --fix",
+
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+
+    "type-check": "npm run type-check:backend && npm run type-check:frontend",
+    "type-check:backend": "cd apps/backend && npm run build",
+    "type-check:frontend": "cd apps/frontend && npm run type-check",
+
+    "clean": "rimraf dist apps/*/dist apps/*/node_modules/.cache",
+    "clean:all": "rimraf node_modules apps/*/node_modules dist apps/*/dist",
+
+    "pkg:install": "npm install -g pkg",
+    "pkg:build": "node scripts/build-production.js",
+    "pkg:build:win": "npm run build && pkg dist/apps/backend/main.js --targets node18-win-x64 --output dist/executables/aems-windows-x64.exe",
+    "pkg:build:mac": "npm run build && pkg dist/apps/backend/main.js --targets node18-macos-x64,node18-macos-arm64 --output dist/executables/aems-macos",
+    "pkg:build:linux": "npm run build && pkg dist/apps/backend/main.js --targets node18-linux-x64,node18-linux-arm64 --output dist/executables/aems-linux",
+
+    "production:build": "node scripts/build-production.js",
+    "production:package": "npm run production:build",
+
+    "setup:dev": "npm run install:all && npm run build",
+    "setup:prod": "npm run production:build",
+
+    "docker:build": "docker build -t aems:latest .",
+    "docker:run": "docker run -p 3000:3000 -p 3001:3001 aems:latest",
+
+    "docs:build": "cd docs && npm run build",
+    "docs:serve": "cd docs && npm run serve",
+
+    "release:patch": "npm version patch && git push && git push --tags",
+    "release:minor": "npm version minor && git push && git push --tags",
+    "release:major": "npm version major && git push && git push --tags"
   },
-  "dependencies": {
-    "@langchain/community": "^0.3.51",
-    "@langchain/openai": "^0.0.25",
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-progress": "^1.1.7",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "cors": "^2.8.5",
-    "csurf": "^1.11.0",
-    "dompurify": "^3.0.6",
-    "dotenv": "^16.3.1",
-    "dunder-proto": "^1.0.1",
-    "express": "^4.18.2",
-    "express-rate-limit": "^7.1.5",
-    "express-session": "^1.17.3",
-    "express-validator": "^7.0.1",
-    "googleapis": "^128.0.0",
-    "helmet": "^7.1.0",
-    "jsdom": "^26.1.0",
-    "langchain": "^0.1.30",
-    "lucide-react": "^0.540.0",
-    "multer": "^1.4.5-lts.1",
-    "node-cron": "^3.0.3",
-    "openai": "^4.28.4",
-    "p-finally": "^2.0.1",
-    "passport": "^0.6.0",
-    "passport-google-oauth20": "^2.0.0",
-    "pdf-parse": "^1.1.1",
-    "tailwind-merge": "^3.3.1",
-    "uuid": "^9.0.1",
-    "write-file-atomic": "^6.0.0",
-    "xlsx": "^0.18.5"
+  "keywords": [
+    "email",
+    "automation",
+    "ai",
+    "machine-learning",
+    "data-extraction",
+    "gmail",
+    "nestjs",
+    "react",
+    "typescript"
+  ],
+  "author": "AEMS Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/aems.git"
   },
-  "homepage": "./",
-  "bin": {
-    "aems": "./desktop-app.js"
+  "bugs": {
+    "url": "https://github.com/your-org/aems/issues"
+  },
+  "homepage": "https://github.com/your-org/aems#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.5",
+    "pkg": "^5.8.1"
   },
   "pkg": {
-    "scripts": [
-      "server.js",
-      "desktop-app.js",
-      "lib/**/*.js"
-    ],
-    "assets": [
-      "public/**/*",
-      "lib/**/*",
-      "views/**/*",
-      "logs/**/*",
-      "data/**/*"
-    ],
-    "outputPath": "dist",
     "targets": [
-      "node18-win-x64"
+      "node18-win-x64",
+      "node18-macos-x64",
+      "node18-macos-arm64",
+      "node18-linux-x64",
+      "node18-linux-arm64"
+    ],
+    "outputPath": "dist/executables",
+    "assets": [
+      "dist/apps/frontend/**/*",
+      "apps/backend/src/database/migrations/**/*",
+      "apps/backend/src/database/seeds/**/*"
+    ],
+    "scripts": [
+      "dist/apps/backend/**/*.js"
     ]
   }
 }
